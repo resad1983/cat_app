@@ -3,292 +3,212 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GitHub電子貓咪 | NekoPet</title>
+    <title>互動貓咪餵養系統</title>
     <style>
-        /* 響應式佈局系統 */
+        /* 響應式佈局核心設定 */
         :root {
-            --primary: #FF7BA9;
-            --secondary: #4B778D;
-            --background: #FFF9F2;
+            --primary-color: #FFB6C1;
+            --secondary-color: #87CEFA;
+            --transition-speed: 0.3s;
         }
 
         body {
-            font-family: 'Microsoft JhengHei', system-ui;
-            background: linear-gradient(135deg, #fff0f4 0%, #f8fcff 100%);
+            font-family: 'Microsoft JhengHei', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             min-height: 100vh;
-            padding: 1rem;
-            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
         }
 
-        .main-container {
-            max-width: 800px;
-            margin: 2rem auto;
-            background: rgba(255,255,255,0.95);
-            border-radius: 20px;
+        #cat-container {
+            position: relative;
+            width: min(90vw, 600px);
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
             padding: 2rem;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin: 1rem;
             backdrop-filter: blur(10px);
         }
 
-        /* 貓咪動畫容器 */
-        .cat-display {
-            position: relative;
-            height: 300px;
-            margin: 2rem 0;
-            background: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiNmZmYiLz48L3N2Zz4=') center/contain no-repeat;
-        }
-
-        .cat-sprite {
-            position: absolute;
-            left: 50%;
-            bottom: 15%;
-            transform: translateX(-50%);
-            width: 180px;
+        #cat {
+            width: 100%;
+            height: auto;
+            transition: transform 0.5s ease-in-out;
             cursor: pointer;
-            transition: all 0.3s ease-out;
         }
 
-        /* 狀態指示器 */
-        .status-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 1.5rem;
-            margin: 2rem 0;
+        #cat:hover {
+            transform: scale(1.05) rotate(2deg);
         }
 
-        .status-card {
-            background: var(--background);
-            padding: 1.5rem;
-            border-radius: 15px;
+        .status-display {
             text-align: center;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.05);
+            font-size: 1.5rem;
+            color: #333;
+            margin: 1rem 0;
+            padding: 0.5rem;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 8px;
+            border: 2px solid var(--primary-color);
         }
 
-        .progress-bar {
-            height: 12px;
-            background: #eee;
-            border-radius: 6px;
-            overflow: hidden;
-            margin-top: 1rem;
-        }
-
-        .progress-fill {
-            height: 100%;
-            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        /* 操作按鈕組 */
-        .action-grid {
+        .control-panel {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
             gap: 1rem;
+            margin-top: 1.5rem;
         }
 
-        .action-btn {
-            padding: 1rem;
+        button {
+            padding: 0.8rem 1.5rem;
             border: none;
-            border-radius: 12px;
+            border-radius: 25px;
+            background: var(--primary-color);
+            color: white;
             font-size: 1.1rem;
             cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
+            transition: all var(--transition-speed) ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
-        .action-btn:hover {
+        button:hover {
+            background: var(--secondary-color);
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
         }
 
-        @media (max-width: 600px) {
-            .main-container {
+        @media (max-width: 480px) {
+            #cat-container {
                 padding: 1rem;
-                margin: 1rem;
             }
-            .action-grid {
-                grid-template-columns: 1fr;
+            
+            button {
+                padding: 0.6rem 1rem;
+                font-size: 0.9rem;
             }
         }
     </style>
 </head>
 <body>
-    <div class="main-container">
-        <h1 style="text-align: center; color: var(--secondary); margin-bottom: 2rem;">
-            🐱 GitHub電子貓咪 🐾
-        </h1>
-
-        <div class="cat-display">
-            <img id="cat" class="cat-sprite" 
-                 src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAIESURBVHgB7ZthT8IwEIWfQ0EwGjV+vv8LxpgYjYkajQkxJkb3x3a9jY2xsa3rLrzkl2zX3rV9d9eOjY0xxhhjjDHGGGOMMcYYY4wxxhhjzCjZJg7Jh5xL6iQOyYucS+okDsmrnEvqJA7Ji5xL6iQOyYucS+okDsmLnEvqJA7Ji5xL6iQOyYucS+okDsmLnEvqJA7Ji5xL6iQOyYucS+okDsmLnEvqJA7Ji5xL6iQOyYucS+okDsmLnEvqJA7Ji5xL6iQOyYucS+okDsmLnEvqJA7Ji5xL6iQOyYucS+okDsmLnEvqJA7Ji5xL6iQOyYucS+okDsmLnEvqJA7Ji5xL6iQOyYucS+okDsmLnEvqJA7Ji5xL6iQOyYucS+okDsmLnEvqJA7Ji5xL6iQOyYucS+okDsmLnEvqJA7Ji5xL6iQOyYucS+okDsmLnEvqJA7Ji5xL6iQOyYucS+okDsmLnEvqJA7Ji5xL6iQOyYucS+okDsmLnEvqJA7Ji5xL6iQOyYucS+okDsmLnEvqJA7Ji5xL6iQOyYucS+okDsmLnEvqJA7Ji5xL6iQOyYucS+okDsmLnEvqJA7Ji5xL6iQOyYucS+okDsmLnEvqJA7Ji5xL6iQOyYucS+okDsmLnEvqJA7Ji5xL6iQOyYucS+okDsmLnEvqJA7Ji5xL6iQOyYucS+okDsmLnEvqJA7Ji5xL6iQOyYucS+okDsmLnEvqJA7Ji5xL6iQOyYucS+okDsmLnEvqJA7Ji5xL6iQOyYucS+okDsmLnEvqJA7Ji5xL6iQOyYucS+okDsmLnEvqJA7Ji5xL6iQOyYucS+okDsmLnEvqJA7Ji5xL6iQOyYucS+okDsmLnEvqJA7Ji5xL6iQOyYucS+okDsmLnEvqJA7Ji5xL6iQOyYucS+okDsmLnEvqJA7Ji5xL6iQOyYucS+okDsmLnEvqJA7Ji5xL6iQOyYucS+okDsmLnEvqJA7Ji5xL6iQOyYucS+okDsmLnEvqJA7Ji5xL6iQOyYv/cS7ZAfMh4Yt+WQ5tAAAAAElFTkSuQmCC" 
-                 onclick="playWithCat()">
-        </div>
-
-        <div class="status-grid">
-            <div class="status-card">
-                <span>🍖 飽食度</span>
-                <div class="progress-bar">
-                    <div id="hunger-bar" class="progress-fill" style="width: 100%; background: #FF6B6B;"></div>
-                </div>
-            </div>
-            <div class="status-card">
-                <span>🎈 心情值</span>
-                <div class="progress-bar">
-                    <div id="happiness-bar" class="progress-fill" style="width: 100%; background: #4ECDC4;"></div>
-                </div>
-            </div>
-            <div class="status-card">
-                <span>🧼 清潔度</span>
-                <div class="progress-bar">
-                    <div id="cleanliness-bar" class="progress-fill" style="width: 100%; background: #A55EEA;"></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="action-grid">
-            <button class="action-btn feed-btn" onclick="feedCat()">
-                <span>餵食</span> 🥩
-            </button>
-            <button class="action-btn play-btn" onclick="playWithCat()">
-                <span>玩耍</span> 🪀
-            </button>
-            <button class="action-btn clean-btn" onclick="cleanCat()">
-                <span>清潔</span> 🧴
-            </button>
+    <div id="cat-container">
+        <div class="status-display" id="status-text">目前狀態：正常</div>
+        <img 
+            id="cat" 
+            src="./assets/images/normal.png" 
+            alt="電子寵物貓"
+            data-states='{
+                "normal": "./assets/images/normal.png?v=20250405",
+                "hungry": "./assets/images/hungry.png?v=20250405",
+                "happy": "./assets/images/happy.png?v=20250405"
+            }'>
+        
+        <div class="control-panel">
+            <button id="feed-btn">餵食貓咪</button>
+            <button id="play-btn">玩耍互動</button>
+            <button id="reset-btn">重置狀態</button>
         </div>
     </div>
 
     <script>
-        // 狀態管理系統
-        class NekoPet {
+        // 狀態機配置參數
+        const STATE_CONFIG = {
+            normal: { 
+                next: 'hungry', 
+                duration: 5000,
+                sound: 'meow.mp3'
+            },
+            hungry: {
+                next: 'happy',
+                duration: 3000,
+                sound: 'eating.mp3'
+            },
+            happy: {
+                next: 'normal',
+                duration: 7000,
+                sound: 'purr.mp3'
+            }
+        };
+
+        // 核心邏輯控制器
+        class CatStateMachine {
             constructor() {
-                this.loadState();
-                this.initSystems();
+                this.catImage = document.getElementById('cat');
+                this.statusText = document.getElementById('status-text');
+                this.stateData = JSON.parse(this.catImage.dataset.states);
+                this.currentState = 'normal';
+                this.initEventListeners();
+                this.autoTransition();
             }
 
-            loadState() {
-                const saved = localStorage.getItem('nekoPetData');
-                this.state = saved ? JSON.parse(saved) : {
-                    hunger: 100,
-                    happiness: 100,
-                    cleanliness: 100,
-                    lastUpdate: Date.now(),
-                    level: 1,
-                    exp: 0
+            initEventListeners() {
+                document.getElementById('feed-btn').addEventListener('click', () => this.changeState('happy'));
+                document.getElementById('play-btn').addEventListener('click', () => this.changeState('hungry'));
+                document.getElementById('reset-btn').addEventListener('click', () => this.resetState());
+                this.catImage.addEventListener('error', (e) => this.handleImageError(e));
+            }
+
+            changeState(newState) {
+                if (this.validateStateTransition(newState)) {
+                    this.currentState = newState;
+                    this.updateDisplay();
+                    this.playSound();
+                    this.autoTransition();
+                }
+            }
+
+            validateStateTransition(targetState) {
+                const allowedTransitions = {
+                    normal: ['hungry'],
+                    hungry: ['happy'],
+                    happy: ['normal']
                 };
+                return allowedTransitions[this.currentState].includes(targetState);
             }
 
-            saveState() {
-                localStorage.setItem('nekoPetData', JSON.stringify(this.state));
-                console.log('Progress saved:', this.state);
+            updateDisplay() {
+                this.catImage.src = this.stateData[this.currentState];
+                this.statusText.textContent = `目前狀態：${this.getLocalizedState()}`;
             }
 
-            initSystems() {
-                // 自動狀態衰減
-                setInterval(() => {
-                    const timeDiff = (Date.now() - this.state.lastUpdate) / 3600000;
-                    this.state.hunger = Math.max(0, this.state.hunger - timeDiff * 3);
-                    this.state.happiness = Math.max(0, this.state.happiness - timeDiff * 2);
-                    this.state.cleanliness = Math.max(0, this.state.cleanliness - timeDiff * 1.5);
-                    this.state.lastUpdate = Date.now();
-                    this.updateUI();
-                }, 5000);
-
-                // 離線補償
-                window.addEventListener('online', () => {
-                    if(navigator.onLine) {
-                        this.calculateOfflineTime();
-                    }
-                });
+            getLocalizedState() {
+                const localization = {
+                    normal: '正常',
+                    hungry: '飢餓',
+                    happy: '開心'
+                };
+                return localization[this.currentState];
             }
 
-            updateUI() {
-                // 更新進度條
-                ['hunger', 'happiness', 'cleanliness'].forEach(stat => {
-                    const bar = document.getElementById(`${stat}-bar`);
-                    bar.style.width = `${Math.max(2, this.state[stat])}%`;
-                });
-
-                // 更新貓咪狀態
-                const catImg = document.getElementById('cat');
-                if(this.state.hunger < 20) {
-                    catImg.src = 'data:image/png;base64,...'; // 飢餓狀態圖
-                } else if(this.state.happiness > 80) {
-                    catImg.src = 'data:image/png;base64,...'; // 開心狀態圖
-                } else {
-                    catImg.src = 'data:image/png;base64,...'; // 普通狀態圖
-                }
+            autoTransition() {
+                clearTimeout(this.transitionTimer);
+                this.transitionTimer = setTimeout(() => {
+                    this.changeState(STATE_CONFIG[this.currentState].next);
+                }, STATE_CONFIG[this.currentState].duration);
             }
 
-            addExperience(points) {
-                this.state.exp += points;
-                if(this.state.exp >= 100) {
-                    this.state.level++;
-                    this.state.exp -= 100;
-                    this.showLevelUp();
-                }
+            resetState() {
+                this.currentState = 'normal';
+                this.updateDisplay();
+                this.autoTransition();
             }
 
-            showLevelUp() {
-                const animation = document.createElement('div');
-                animation.innerHTML = `🎉 升級到 Lv.${this.state.level}！`;
-                animation.style.cssText = `
-                    position: fixed;
-                    top: 20%;
-                    left: 50%;
-                    transform: translateX(-50%);
-                    font-size: 1.5rem;
-                    color: #FF6B6B;
-                    animation: float 2s ease-out;
-                `;
-                document.body.appendChild(animation);
-                setTimeout(() => animation.remove(), 2000);
+            playSound() {
+                const audio = new Audio(`./assets/sounds/${STATE_CONFIG[this.currentState].sound}`);
+                audio.play().catch(() => console.log('需要使用者互動才能播放音效'));
+            }
+
+            handleImageError(event) {
+                console.error('圖片載入失敗:', event.target.src);
+                event.target.src = './assets/images/fallback.png';
             }
         }
 
-        // 初始化應用
-        const nekoApp = new NekoPet();
-
-        // 互動功能
-        function feedCat() {
-            if(nekoApp.state.hunger < 95) {
-                nekoApp.state.hunger += 5;
-                nekoApp.addExperience(3);
-                animateButton('.feed-btn');
-            }
-            nekoApp.updateUI();
-        }
-
-        function playWithCat() {
-            nekoApp.state.happiness = Math.min(100, nekoApp.state.happiness + 8);
-            nekoApp.addExperience(5);
-            document.getElementById('cat').style.transform = 'translateX(-50%) scale(1.15)';
-            setTimeout(() => {
-                document.getElementById('cat').style.transform = 'translateX(-50%)';
-            }, 300);
-            nekoApp.updateUI();
-        }
-
-        function cleanCat() {
-            nekoApp.state.cleanliness = Math.min(100, nekoApp.state.cleanliness + 10);
-            nekoApp.addExperience(2);
-            animateButton('.clean-btn');
-            nekoApp.updateUI();
-        }
-
-        // 動畫效果
-        function animateButton(selector) {
-            const btn = document.querySelector(selector);
-            btn.animate([
-                { transform: 'scale(1)', opacity: 1 },
-                { transform: 'scale(0.9)', opacity: 0.8 },
-                { transform: 'scale(1)', opacity: 1 }
-            ], { duration: 300 });
-        }
-
-        // 保存機制
-        window.addEventListener('beforeunload', () => nekoApp.saveState());
+        // 初始化狀態機
+        window.addEventListener('DOMContentLoaded', () => new CatStateMachine());
     </script>
 </body>
 </html>
+
