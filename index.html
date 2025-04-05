@@ -2,213 +2,305 @@
 <html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>互動貓咪餵養系統</title>
+    <title>多型態貓咪養成系統</title>
     <style>
-        /* 響應式佈局核心設定 */
         :root {
             --primary-color: #FFB6C1;
             --secondary-color: #87CEFA;
-            --transition-speed: 0.3s;
         }
 
         body {
             font-family: 'Microsoft JhengHei', sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f8f8f8;
         }
 
         #cat-container {
-            position: relative;
-            width: min(90vw, 600px);
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 15px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            padding: 2rem;
-            margin: 1rem;
-            backdrop-filter: blur(10px);
-        }
-
-        #cat {
-            width: 100%;
-            height: auto;
-            transition: transform 0.5s ease-in-out;
-            cursor: pointer;
-        }
-
-        #cat:hover {
-            transform: scale(1.05) rotate(2deg);
-        }
-
-        .status-display {
             text-align: center;
-            font-size: 1.5rem;
-            color: #333;
-            margin: 1rem 0;
-            padding: 0.5rem;
-            background: rgba(255, 255, 255, 0.8);
-            border-radius: 8px;
-            border: 2px solid var(--primary-color);
+            margin: 30px 0;
+            position: relative;
         }
 
-        .control-panel {
+        #cat-image {
+            width: 250px;
+            transition: transform 0.3s;
+            cursor: pointer;
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .progress-section {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .requirement-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 1rem;
-            margin-top: 1.5rem;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .requirement-card {
+            padding: 15px;
+            border-radius: 8px;
+            background: var(--secondary-color);
+            color: white;
         }
 
         button {
-            padding: 0.8rem 1.5rem;
-            border: none;
-            border-radius: 25px;
             background: var(--primary-color);
             color: white;
-            font-size: 1.1rem;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
             cursor: pointer;
-            transition: all var(--transition-speed) ease;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            font-size: 16px;
+            margin: 5px;
+            transition: all 0.3s;
         }
 
         button:hover {
-            background: var(--secondary-color);
             transform: translateY(-2px);
-            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 3px 6px rgba(0,0,0,0.15);
         }
 
-        @media (max-width: 480px) {
-            #cat-container {
-                padding: 1rem;
-            }
-            
-            button {
-                padding: 0.6rem 1rem;
-                font-size: 0.9rem;
-            }
+        #stage-title {
+            color: #333;
+            text-align: center;
+            font-size: 2em;
+            margin: 20px 0;
+        }
+
+        .variant-alert {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
         }
     </style>
 </head>
 <body>
+    <h1 id="stage-title">🐾 幼貓養成中</h1>
+    
     <div id="cat-container">
-        <div class="status-display" id="status-text">目前狀態：正常</div>
-        <img 
-            id="cat" 
-            src="./assets/images/normal.png" 
-            alt="電子寵物貓"
-            data-states='{
-                "normal": "./assets/images/normal.png?v=20250405",
-                "hungry": "./assets/images/hungry.png?v=20250405",
-                "happy": "./assets/images/happy.png?v=20250405"
-            }'>
-        
-        <div class="control-panel">
-            <button id="feed-btn">餵食貓咪</button>
-            <button id="play-btn">玩耍互動</button>
-            <button id="reset-btn">重置狀態</button>
+        <img id="cat-image" src="images/stage0.png" alt="貓咪型態">
+    </div>
+
+    <div class="progress-section">
+        <div class="requirement-grid">
+            <div class="requirement-card">
+                <h3>🥫 餵食進度</h3>
+                <p><span id="feed-count">0</span>/<span id="feed-required">10</span> 次</p>
+            </div>
+            <div class="requirement-card">
+                <h3>🎮 遊戲進度</h3>
+                <p><span id="play-count">0</span>/<span id="play-required">5</span> 次</p>
+            </div>
         </div>
     </div>
 
+    <div style="text-align: center">
+        <button onclick="interact('feed')">餵食貓咪</button>
+        <button onclick="interact('play')">陪貓玩耍</button>
+    </div>
+
     <script>
-        // 狀態機配置參數
-        const STATE_CONFIG = {
-            normal: { 
-                next: 'hungry', 
-                duration: 5000,
-                sound: 'meow.mp3'
-            },
-            hungry: {
-                next: 'happy',
-                duration: 3000,
-                sound: 'eating.mp3'
-            },
-            happy: {
-                next: 'normal',
-                duration: 7000,
-                sound: 'purr.mp3'
-            }
-        };
-
-        // 核心邏輯控制器
-        class CatStateMachine {
+        class CatLifecycle {
             constructor() {
-                this.catImage = document.getElementById('cat');
-                this.statusText = document.getElementById('status-text');
-                this.stateData = JSON.parse(this.catImage.dataset.states);
-                this.currentState = 'normal';
-                this.initEventListeners();
-                this.autoTransition();
+                this.stages = [
+                    { 
+                        name: '幼貓', 
+                        imagePath: 'images/stage0.png',
+                        requirements: { feed: 10, play: 5 },
+                        variants: 1
+                    },
+                    { 
+                        name: '成長期', 
+                        imagePath: 'images/stage1_',
+                        requirements: { feed: 10, play: 5 },
+                        variants: 5
+                    },
+                    { 
+                        name: '完全體', 
+                        imagePath: 'images/stage2_',
+                        variants: 5
+                    }
+                ];
+                
+                this.state = {
+                    stage: 0,
+                    feedCount: 0,
+                    playCount: 0,
+                    variant: 1,
+                    unlocked: { stage1: new Set(), stage2: new Set() }
+                };
+                
+                this.loadState();
+                this.preloadImages();
             }
 
-            initEventListeners() {
-                document.getElementById('feed-btn').addEventListener('click', () => this.changeState('happy'));
-                document.getElementById('play-btn').addEventListener('click', () => this.changeState('hungry'));
-                document.getElementById('reset-btn').addEventListener('click', () => this.resetState());
-                this.catImage.addEventListener('error', (e) => this.handleImageError(e));
+            preloadImages() {
+                [1,2].forEach(stage => {
+                    for(let v=1; v<=5; v++) {
+                        new Image().src = `images/stage${stage}_${v}.png`;
+                    }
+                });
             }
 
-            changeState(newState) {
-                if (this.validateStateTransition(newState)) {
-                    this.currentState = newState;
-                    this.updateDisplay();
-                    this.playSound();
-                    this.autoTransition();
+            saveState() {
+                localStorage.setItem('catState', JSON.stringify({
+                    ...this.state,
+                    unlocked: {
+                        stage1: [...this.state.unlocked.stage1],
+                        stage2: [...this.state.unlocked.stage2]
+                    }
+                }));
+            }
+
+            loadState() {
+                const saved = localStorage.getItem('catState');
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    this.state = {
+                        ...data,
+                        unlocked: {
+                            stage1: new Set(data.unlocked.stage1),
+                            stage2: new Set(data.unlocked.stage2)
+                        }
+                    };
                 }
             }
 
-            validateStateTransition(targetState) {
-                const allowedTransitions = {
-                    normal: ['hungry'],
-                    hungry: ['happy'],
-                    happy: ['normal']
-                };
-                return allowedTransitions[this.currentState].includes(targetState);
+            interact(type) {
+                if (this.isMaxStage()) return;
+                
+                type === 'feed' ? this.state.feedCount++ : this.state.playCount++;
+                
+                if (this.checkRequirements()) {
+                    this.upgradeStage();
+                }
+                
+                this.updateUI();
+                this.saveState();
             }
 
-            updateDisplay() {
-                this.catImage.src = this.stateData[this.currentState];
-                this.statusText.textContent = `目前狀態：${this.getLocalizedState()}`;
+            checkRequirements() {
+                const req = this.stages[this.state.stage].requirements;
+                return req && this.state.feedCount >= req.feed && 
+                             this.state.playCount >= req.play;
             }
 
-            getLocalizedState() {
-                const localization = {
-                    normal: '正常',
-                    hungry: '飢餓',
-                    happy: '開心'
-                };
-                return localization[this.currentState];
+            upgradeStage() {
+                if (this.state.stage >= 2) return;
+
+                this.state.stage++;
+                this.state.variant = Math.floor(Math.random() * 
+                    this.stages[this.state.stage].variants) + 1;
+                
+                // 紀錄解鎖型態
+                const stageKey = `stage${this.state.stage}`;
+                this.state.unlocked[stageKey].add(this.state.variant);
+                
+                this.resetCounters();
+                
+                if (this.state.stage === 2) {
+                    setTimeout(() => {
+                        this.showCompletion();
+                    }, 120000);
+                }
+                
+                this.showVariantAlert();
             }
 
-            autoTransition() {
-                clearTimeout(this.transitionTimer);
-                this.transitionTimer = setTimeout(() => {
-                    this.changeState(STATE_CONFIG[this.currentState].next);
-                }, STATE_CONFIG[this.currentState].duration);
+            getImageSrc() {
+                const stage = this.stages[this.state.stage];
+                return stage.variants > 1 ? 
+                    `${stage.imagePath}${this.state.variant}.png` : 
+                    stage.imagePath;
             }
 
-            resetState() {
-                this.currentState = 'normal';
-                this.updateDisplay();
-                this.autoTransition();
+            showVariantAlert() {
+                const alert = document.createElement('div');
+                alert.className = 'variant-alert';
+                alert.innerHTML = `
+                    <span>🎉 解鎖 ${this.stages[this.state.stage].name} 型態 ${this.state.variant} 號！</span>
+                    <img src="${this.getImageSrc()}" width="50">
+                `;
+                document.body.appendChild(alert);
+                setTimeout(() => alert.remove(), 3000);
             }
 
-            playSound() {
-                const audio = new Audio(`./assets/sounds/${STATE_CONFIG[this.currentState].sound}`);
-                audio.play().catch(() => console.log('需要使用者互動才能播放音效'));
+            updateUI() {
+                // 更新文字顯示
+                document.getElementById('stage-title').textContent = 
+                    `${this.stages[this.state.stage].name} 養成中`;
+                
+                // 更新圖片
+                const imgElement = document.getElementById('cat-image');
+                imgElement.src = this.getImageSrc();
+                
+                // 更新進度數據
+                const currentStage = this.stages[this.state.stage];
+                if (currentStage.requirements) {
+                    document.getElementById('feed-count').textContent = this.state.feedCount;
+                    document.getElementById('play-count').textContent = this.state.playCount;
+                    document.getElementById('feed-required').textContent = currentStage.requirements.feed;
+                    document.getElementById('play-required').textContent = currentStage.requirements.play;
+                }
             }
 
-            handleImageError(event) {
-                console.error('圖片載入失敗:', event.target.src);
-                event.target.src = './assets/images/fallback.png';
+            resetCounters() {
+                this.state.feedCount = 0;
+                this.state.playCount = 0;
+            }
+
+            isMaxStage() {
+                return this.state.stage >= 2;
+            }
+
+            showCompletion() {
+                if (confirm('🎉 貓咪已完全成長！要培育新貓咪嗎？')) {
+                    localStorage.clear();
+                    location.reload();
+                }
             }
         }
 
-        // 初始化狀態機
-        window.addEventListener('DOMContentLoaded', () => new CatStateMachine());
+        const catLifecycle = new CatLifecycle();
+
+        // 初始化介面
+        catLifecycle.updateUI();
+
+        // 互動函數
+        function interact(type) {
+            catLifecycle.interact(type);
+        }
+
+        // 錯誤處理
+        document.getElementById('cat-image').onerror = function() {
+            this.src = 'images/default_cat.png';
+            this.style.backgroundColor = '#ffe0e0';
+        };
     </script>
 </body>
 </html>
-
