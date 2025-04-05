@@ -123,6 +123,14 @@
         <button onclick="interact('feed')">餵食貓咪</button>
         <button onclick="interact('play')">陪貓玩耍</button>
     </div>
+    <!-- 新增於按鈕區塊下方 -->
+<div id="reset-section" style="margin-top: 30px; text-align: center">
+  <button id="reset-btn" class="danger-btn" 
+          onclick="catLifecycle.hardReset()">
+    🔄 重新養成
+  </button>
+  <p class="tip-text">（僅在完全體狀態顯示）</p>
+</div>
 
     <script>
         class CatLifecycle {
@@ -255,6 +263,9 @@
                 document.getElementById('stage-title').textContent = 
                     `${this.stages[this.state.stage].name} 養成中`;
                 
+                const resetBtn = document.getElementById('reset-btn');
+                resetBtn.style.display = this.isMaxStage() ? 'block' : 'none';
+                
                 // 更新圖片
                 const imgElement = document.getElementById('cat-image');
                 imgElement.src = this.getImageSrc();
@@ -296,6 +307,33 @@
             catLifecycle.interact(type);
         }
 
+          // 新增重置方法
+  hardReset() {
+    if(!confirm('⚠️ 確定要重新開始嗎？所有成長記錄都會消失！')) return;
+
+    // 徹底清除存檔
+    localStorage.removeItem('catLifeState');
+    
+    // 重新初始化所有狀態
+    this.state = {
+      stage: 0,
+      feedCount: 0,
+      playCount: 0,
+      catName: '咪咪',
+      lastFeed: 0,
+      lastPlay: 0
+    };
+    
+    this.saveState();
+    this.updateUI();
+    alert('🎉 已重置，開始新的養成旅程吧！');
+  }
+
+  // 新增完全體判斷
+  isMaxStage() {
+    return this.state.stage >= 5; // 假設最高階段為5
+  }
+        
         // 錯誤處理
         document.getElementById('cat-image').onerror = function() {
             this.src = 'images/default_cat.png';
